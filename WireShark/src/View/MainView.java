@@ -39,20 +39,19 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 	 * Create the frame.
 	 */
 	
-	Scanner in;  // from ¼­¹ö
-	OutputStream out; // to ¼­¹ö
+	Scanner in;  
 	
 	public MainView() {
 		
 		// JFrame
-		setResizable(false); // frame Å©±â Á¶Àı
+		setResizable(false); // frame í¬ê¸° ì¡°ì ˆ
 		setTitle("WireShark"); // frame title
-		//setLayout(new FlowLayout(FlowLayout.CENTER,0,30));
-		getContentPane().setLayout(new BorderLayout(20,20));
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Á¾·á ¹öÆ°
+		//getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER,0,30));
+		getContentPane().setLayout(new BorderLayout(10,30));
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ì¢…ë£Œ ë²„íŠ¼
 		setBounds(300, 100, 800, 600);   
 		// JPanel
-		// 1.¸Ş´º¹Ù 
+		// 1.ë©”ë‰´ë°” 
 		menubar = new JMenuBar();
 		file = new JMenu("file");
 		edit = new JMenu("edit");
@@ -67,7 +66,7 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 		
 		setJMenuBar(menubar);
 		
-		// 2. ½ÇÇà ¹× Á¤Áö ¹öÆ° ´ãÀ» ÆÇ³Ú
+		// 2. ì‹¤í–‰ ë° ì •ì§€ ë²„íŠ¼ ë‹´ì„ íŒë„¬
 		//setContentPane(pan_sec);
 		pan_sec = new JPanel();
 		btn_run= new JButton("RUN");
@@ -78,7 +77,7 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 
 	
 		
-		// 3. ÇÊÅÍ ´ãÀ» ÆÇ³Ú(º¸·ù)
+		// 3. í•„í„° ë‹´ì„ íŒë„¬(ë³´ë¥˜)
 		pan_thd = new JPanel();
 		text_filter = new JTextField(10);
 		la_filter = new JLabel("filter : ");
@@ -88,31 +87,39 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 		//pan_thd.setVisible(true);
 		
 		
-		// 4. Ä¸Ã³µÈ ÆĞÅ¶ÀÇ ÀÚ¼¼ÇÑ Á¤º¸ ¿ä¾àÇÏ´Â ÆÇ³Ú
+		// 4. ìº¡ì²˜ëœ íŒ¨í‚·ì˜ ìì„¸í•œ ì •ë³´ ìš”ì•½í•˜ëŠ” íŒë„¬
 		
 		
 		pan_four = new JPanel();
 		pan_four.setLayout(new GridLayout(6,1));
 		area_packinfo = new JTextArea();
-		scrol_packinfo = new JScrollPane();
+		scrol_packinfo = new JScrollPane(area_packinfo);
+		scrol_packinfo.setBounds(300, 500, 800, 200);
+		pan_four.add(new JLabel("    No.                  Time                Source                                         Destination                    Protocol                          Inof"));
 		pan_four.add(scrol_packinfo);
-		pan_four.add(area_packinfo);
+		//pan_four.add(area_packinfo);
 		//setContentPane(pan_four);
+		//pan_four.setBounds(300, 500, 800, 200);
+		//pan_four.set
 		
-		
-		// 5. 4¹ø¿¡ ³ª¾Æ°¡ »ç¿¡ÇÑ Á¤º¸ Ç¥½ÃÇÏ´Â ÆÇ³Ú
+		// 5. 4ë²ˆì— ë‚˜ì•„ê°€ ì‚¬ì—í•œ ì •ë³´ í‘œì‹œí•˜ëŠ” íŒë„¬
 		pan_fiv = new JPanel();
 		pan_fiv.setLayout(new GridLayout(6,1));
 		//setContentPane(pan_fiv);
 	
-		// 6. ÆĞÅ¶ÀÇ µ¥ÀÌÅÍ¸¦ Çí»ç°ªÀ¸·Î Ç¥½ÃÇÒ ÆÇ³Ú
+		// 6. íŒ¨í‚·ì˜ ë°ì´í„°ë¥¼ í—¥ì‚¬ê°’ìœ¼ë¡œ í‘œì‹œí•  íŒë„¬
 		pan_six = new JPanel();
 		pan_six.setLayout(new GridLayout(6,1));
 		//setContentPane(pan_six);
 		
+		//add(pan_sec);
+		//add(pan_four);
+		//add(pan_thd);
+		//add(pan_fiv);
+		//add(pan_six);
 		add("North",pan_sec);
-		add("Center",pan_thd);
-		add("South",pan_four);
+		add("Center",pan_four);
+		add("South",pan_thd);
 		add("West",pan_fiv);
 		add("East",pan_six);
 
@@ -121,11 +128,12 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 	@Override
 	public void run() {
 		while (true) {
-			String msg = in.nextLine();
+			String msg = in.nextLine(); 
 			area_packinfo.append(msg+"\n");
 			
-			// ½ºÅ©·Ñ¹Ù µû¶ó ³»·Á¿À°Ô ÇÏ·Á°í
+			// ìŠ¤í¬ë¡¤ë°” ë”°ë¼ ë‚´ë ¤ì˜¤ê²Œ í•˜ë ¤ê³ 
 			area_packinfo.setCaretPosition(area_packinfo.getText().length());
+			
 		}
 	}
 	
