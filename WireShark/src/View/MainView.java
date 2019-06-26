@@ -3,6 +3,7 @@ package View;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -18,10 +19,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
 
 public class MainView extends JFrame implements ActionListener, Runnable{
 
@@ -33,8 +36,12 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 	public JMenuBar menubar;
 	public JMenu file, edit, view, go;	
 	
-	public JTextArea area_packinfo;
+	//public JTextArea area_packinfo;
+	public JTable  area_packinfo;
 	public JScrollPane scrol_packinfo;
+	String[] colName = {"No.","Time","Source","Destination","Protocol","Info"};
+	String[][] val = {{"0","0","0","0","0","0"}};
+
 	/**
 	 * Create the frame.
 	 */
@@ -49,7 +56,7 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 		//getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER,0,30));
 		getContentPane().setLayout(new BorderLayout(10,30));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // 종료 버튼
-		setBounds(300, 100, 800, 600);   
+		setBounds(300, 100, 800, 100);   
 		// JPanel
 		// 1.메뉴바 
 		menubar = new JMenuBar();
@@ -88,19 +95,49 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 		
 		
 		// 4. 캡처된 패킷의 자세한 정보 요약하는 판넬
-		
-		
+
 		pan_four = new JPanel();
 		pan_four.setLayout(new GridLayout(6,1));
-		area_packinfo = new JTextArea();
+		//area_packinfo = new JTextArea();			
+	    //pan_four.add(new JLabel("    No.                  Time                Source                                         Destination                    Protocol                          Inof"));
+
+
+		DefaultTableModel model = new DefaultTableModel(val,colName);
+		area_packinfo = new JTable(model);
 		scrol_packinfo = new JScrollPane(area_packinfo);
+		
+		area_packinfo.updateUI();
+		add(scrol_packinfo);
+		
+		area_packinfo.setSize(400,800);
+		scrol_packinfo.setPreferredSize(new Dimension(500,600));
 		scrol_packinfo.setBounds(300, 500, 800, 200);
-		pan_four.add(new JLabel("    No.                  Time                Source                                         Destination                    Protocol                          Inof"));
-		pan_four.add(scrol_packinfo);
+
+		setBounds(0,0,1000,700);
+        pan_four.add(scrol_packinfo);
 		//pan_four.add(area_packinfo);
 		//setContentPane(pan_four);
 		//pan_four.setBounds(300, 500, 800, 200);
 		//pan_four.set
+        
+        
+        // * 스레드
+        MainView runnable= new MainView(area_packinfo);
+        Thread th = new Thread(runnable);
+		th.start();
+		
+		// * 정지 버튼
+		btn_stop.addActionListener(new ActionListener() 
+		{ 
+			@Override 
+			public void actionPerformed(ActionEvent e) 
+			{ 
+				th.interrupt(); //종료 
+				JButton btn_stop = (JButton)e.getSource(); 
+				btn_stop.setEnabled(false); // 버튼 비활성화 
+			} 
+		}); 
+
 		
 		// 5. 4번에 나아가 사에한 정보 표시하는 판넬
 		pan_fiv = new JPanel();
@@ -125,16 +162,30 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 
 		setVisible(true);
 	}
+	
+	public MainView(JTable area_packinfo)
+	{
+		this.area_packinfo = area_packinfo;
+	}
+	
 	@Override
-	public void run() {
-		while (true) {
-			String msg = in.nextLine(); 
-			area_packinfo.append(msg+"\n");
-			
-			// 스크롤바 따라 내려오게 하려고
-			area_packinfo.setCaretPosition(area_packinfo.getText().length());
-			
+	public void run() 
+	{
+		DefaultTableModel m =(DefaultTableModel)area_packinfo.getModel();
+		int n =1;
+		while(true)
+		{
+			m.insertRow(0,new Object[]{n,"a1","a2","a3","a4","a5"});
+			n++;
+			try {
+				Thread.sleep(500);
+			}
+			catch(InterruptedException e)
+			{
+				return;
+			}
 		}
+
 	}
 	
 	@Override
