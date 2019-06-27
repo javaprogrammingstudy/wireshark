@@ -1,27 +1,21 @@
 package View;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Scanner;
+
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.OutputStream;
-import java.util.Scanner;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-
-import javax.swing.SwingConstants;
 
 public class MainView extends JFrame implements ActionListener, Runnable{
 
@@ -53,10 +47,40 @@ public class MainView extends JFrame implements ActionListener, Runnable{
 		// JPanel
 		// 1.메뉴바 
 		menubar = new JMenuBar();
+		
 		file = new JMenu("file");
+		JMenuItem open = new JMenuItem("open");
+		JMenuItem close = new JMenuItem("close");
+		JMenuItem save = new JMenuItem("save");
+		file.add(open);
+		file.add(close);
+		file.add(save);
+		
 		edit = new JMenu("edit");
+		JMenuItem FindPacket = new JMenuItem("FindPacket");
+		JMenuItem MarkUnMark = new JMenuItem("Mark / UnMark");
+		JMenuItem Ignore = new JMenuItem("Ignore");
+		edit.add(FindPacket);
+		edit.add(MarkUnMark);
+		edit.add(Ignore);
+		
 		view = new JMenu("view");
+		JMenuItem ShowPacketinNewWindow = new JMenuItem("Show Packet in New Window");
+		view.add(ShowPacketinNewWindow);
+		
 		go = new JMenu("go");
+		JMenuItem Gotopacket = new JMenuItem("Go to packet");
+		JMenuItem Previouspacket = new JMenuItem("Previous packet");
+		JMenuItem Nextpacket = new JMenuItem("Next packet");
+		JMenuItem Firstpacket = new JMenuItem("First packet");
+		JMenuItem Lastpacket = new JMenuItem("Last packet");
+		go.add(Gotopacket);
+		go.add(Previouspacket);
+		go.add(Nextpacket);
+		go.add(Firstpacket);
+		go.add(Lastpacket);
+		
+		
 		//pan_fst.setLayout(new GridLayout(1,4));
 		
 		menubar.add(file);
