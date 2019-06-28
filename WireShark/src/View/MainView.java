@@ -1,5 +1,6 @@
 package View;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,9 +17,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 public class MainView extends JFrame implements Runnable {
 
+	public JTextArea area_SpecificPackinfo,area_HexCodeinfo;
 	public JTextField text_filter;
 	public JPanel upper_pan, lower_pan, Main_pan, pan_fst, pan_btn, pan_filter, pan_packetTable, pan_PacketInfo,
 			pan_PacketHexCode;
@@ -30,15 +33,15 @@ public class MainView extends JFrame implements Runnable {
 	public JMenu file, edit, view, go;
 	public JTable table;
 
-	public JTextArea area_packinfo;
+	public JTable area_packinfo;
 	public JScrollPane scrol_packinfo;
 	/**
 	 * Create the frame.
 	 */
 
 	// packet_table을 텍스트 필드에서 JTable로 바꿀까하는 실험하는 중
-	String title[] = { "No.", "Time", "Source", "Destination", "Protocol", "Length", "Internet Protocol" };
-	String data[][];
+	String[] colName = {"No.","Time","Source","Destination","Protocol","Info"};
+	String[][] val = {{"0","0","0","0","0","0"}};
 	//
 
 	Scanner in;
@@ -121,7 +124,6 @@ public class MainView extends JFrame implements Runnable {
 		// 2. upper_pan에 추가할 3가지 판넬
 		// pan_btn : 실행 및 정지 버튼 담을 판넬
 		// pan_filter : 검색을 위한 filter 판넬
-		// pan_packetInfo : Packet의 정보를 나열하는 헤더가 담긴 판넬 -> 따로 객체 안만듦, add(new ~)로 바로 생성함
 		pan_btn = new JPanel();
 		// pan_sec.setBackground(Color.blue);
 		btn_run = new JButton("RUN");
@@ -145,27 +147,52 @@ public class MainView extends JFrame implements Runnable {
 		pan_packetTable = new JPanel();
 		// pan_packetTable.setBackground(Color.yellow);
 		pan_packetTable.setLayout(new GridLayout(1, 1));
-		area_packinfo = new JTextArea();
+		//area_packinfo = new JTextArea();
 		scrol_packinfo = new JScrollPane(area_packinfo);
-		pan_packetTable.add(scrol_packinfo);
 
 		// 실험중인 테이블화
-		table = new JTable(data, title);
-
+		DefaultTableModel model = new DefaultTableModel(val,colName);
+		area_packinfo = new JTable(model);
+		scrol_packinfo = new JScrollPane(area_packinfo);
+		
+		area_packinfo.updateUI();
+		pan_packetTable.add(scrol_packinfo);
+		//add(scrol_packinfo);
+		
+		//area_packinfo.setSize(400,800);
+		//scrol_packinfo.setPreferredSize(new Dimension(500,600));
+		//scrol_packinfo.setBounds(300, 500, 800, 200);
+		
+		 MainView runnable= new MainView(area_packinfo);
+	        Thread th = new Thread(runnable);
+			th.start();
+			
+			// * 정지 버튼
+			btn_stop.addActionListener(new ActionListener() 
+			{ 
+				@Override 
+				public void actionPerformed(ActionEvent e) 
+				{ 
+					th.interrupt(); //종료 
+					JButton btn_stop = (JButton)e.getSource(); 
+					btn_stop.setEnabled(false); // 버튼 비활성화 
+				} 
+			}); 
+		
 		// 4.lower 테이블
 		// pan_PacketInfo : 해당 패킷에 대한 구체적인 정보 출력
 		// pan_PacketHexCode : 해당 패킷에 대한 헥사 값 출력
 		pan_PacketInfo = new JPanel();
-		area_packinfo = new JTextArea();
-		scrol_packinfo = new JScrollPane(area_packinfo);
+		area_SpecificPackinfo = new JTextArea();
+		scrol_packinfo = new JScrollPane(area_SpecificPackinfo);
 		scrol_packinfo.setSize(100, 100);
 		pan_PacketInfo.add(scrol_packinfo);
 		pan_PacketInfo.setLayout(new GridLayout(1, 1));
 		// setContentPane(pan_fiv);
 
 		pan_PacketHexCode = new JPanel();
-		area_packinfo = new JTextArea();
-		scrol_packinfo = new JScrollPane(area_packinfo);
+		area_HexCodeinfo = new JTextArea();
+		scrol_packinfo = new JScrollPane(area_HexCodeinfo);
 		scrol_packinfo.setSize(100, 100);
 		pan_PacketHexCode.add(scrol_packinfo);
 		pan_PacketHexCode.setLayout(new GridLayout(1, 1));
@@ -173,8 +200,6 @@ public class MainView extends JFrame implements Runnable {
 		// upper 팬
 		upper_pan.add(pan_btn);
 		upper_pan.add(pan_filter);
-		upper_pan.add(new JLabel(
-				"    No.                  Time                Source                                         Destination                    Protocol                          Inof"));
 
 		// lower 팬
 		lower_pan.add(pan_PacketInfo);
@@ -189,14 +214,26 @@ public class MainView extends JFrame implements Runnable {
 		setVisible(true);
 	}
 
+	public MainView(JTable area_packinfo)
+	{
+		this.area_packinfo = area_packinfo;
+	}
+	
 	@Override
 	public void run() {
-		while (true) {
-			String msg = in.nextLine();
-			area_packinfo.append(msg + "\n");
-
-			// 스크롤바 따라 내려오게 하려고
-			area_packinfo.setCaretPosition(area_packinfo.getText().length());
+		DefaultTableModel m =(DefaultTableModel)area_packinfo.getModel();
+		int n =1;
+		while(true)
+		{
+			m.insertRow(0,new Object[]{n,"a1","a2","a3","a4","a5"});
+			n++;
+			try {
+				Thread.sleep(500);
+			}
+			catch(InterruptedException e)
+			{
+				return;
+			}
 		}
 	}
 
@@ -236,7 +273,7 @@ public class MainView extends JFrame implements Runnable {
 				System.out.println("");
 				break;
 			case "Ignore":
-				System.out.println();
+				System.out.println("");
 				break;
 			case "ShowPacketinNewWindow":
 				System.out.println("선택된 패킷의 자세한 정보와 헥사값을 한번에 볼 수 있음. or 더블클릭");
@@ -249,7 +286,7 @@ public class MainView extends JFrame implements Runnable {
 				break;
 			case "Nextpacket":
 				System.out.println("다음 패킷으로 이동");
-				break;
+				break; 
 			case "Firstpacket":
 				System.out.println("가장 맨 처음 패킷으로 이동");
 				break;
