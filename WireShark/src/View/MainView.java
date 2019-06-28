@@ -17,12 +17,14 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-public class MainView extends JFrame implements ActionListener, Runnable {
+public class MainView extends JFrame implements Runnable {
 
 	public JTextField text_filter;
-	public JPanel upper_pan, lower_pan, Main_pan, pan_fst, pan_btn, pan_filter, pan_packetTable, pan_PacketInfo, pan_PacketHexCode;
-	public JButton btn_run = new JButton("RUN");
-	public JButton btn_stop = new JButton("STOP");
+	public JPanel upper_pan, lower_pan, Main_pan, pan_fst, pan_btn, pan_filter, pan_packetTable, pan_PacketInfo,
+			pan_PacketHexCode;
+	public JButton btn_run;
+	public JButton btn_stop;
+	public JButton btn_search;
 	public JLabel la_filter;
 	public JMenuBar menubar;
 	public JMenu file, edit, view, go;
@@ -38,7 +40,7 @@ public class MainView extends JFrame implements ActionListener, Runnable {
 	String title[] = { "No.", "Time", "Source", "Destination", "Protocol", "Length", "Internet Protocol" };
 	String data[][];
 	//
-	
+
 	Scanner in;
 
 	public MainView() {
@@ -63,8 +65,13 @@ public class MainView extends JFrame implements ActionListener, Runnable {
 		JMenuItem close = new JMenuItem("close");
 		JMenuItem save = new JMenuItem("save");
 		file.add(open);
+		file.addSeparator();
 		file.add(close);
+		file.addSeparator();
 		file.add(save);
+		open.addActionListener(new MenuActionListener());
+		close.addActionListener(new MenuActionListener());
+		save.addActionListener(new MenuActionListener());
 
 		// edit 메뉴와 아이템 객체들
 		edit = new JMenu("edit");
@@ -74,11 +81,15 @@ public class MainView extends JFrame implements ActionListener, Runnable {
 		edit.add(FindPacket);
 		edit.add(MarkUnMark);
 		edit.add(Ignore);
+		FindPacket.addActionListener(new MenuActionListener());
+		MarkUnMark.addActionListener(new MenuActionListener());
+		Ignore.addActionListener(new MenuActionListener());
 
 		// view 메뉴와 아이템 객체들
 		view = new JMenu("view");
 		JMenuItem ShowPacketinNewWindow = new JMenuItem("Show Packet in New Window");
 		view.add(ShowPacketinNewWindow);
+		ShowPacketinNewWindow.addActionListener(new MenuActionListener());
 
 		// go 메뉴와 아이템 객체들
 		go = new JMenu("go");
@@ -92,6 +103,11 @@ public class MainView extends JFrame implements ActionListener, Runnable {
 		go.add(Nextpacket);
 		go.add(Firstpacket);
 		go.add(Lastpacket);
+		Gotopacket.addActionListener(new MenuActionListener());
+		Previouspacket.addActionListener(new MenuActionListener());
+		Nextpacket.addActionListener(new MenuActionListener());
+		Firstpacket.addActionListener(new MenuActionListener());
+		Lastpacket.addActionListener(new MenuActionListener());
 
 		// 메뉴바에 위의 메뉴들을 전부 붙임.
 		menubar.add(file);
@@ -102,39 +118,43 @@ public class MainView extends JFrame implements ActionListener, Runnable {
 		// Frame에 메뉴바 추가
 		setJMenuBar(menubar);
 
-		
 		// 2. upper_pan에 추가할 3가지 판넬
-			// pan_btn : 실행 및 정지 버튼 담을 판넬
-			// pan_filter : 검색을 위한 filter 판넬
-			// pan_packetInfo : Packet의 정보를 나열하는 헤더가 담긴 판넬 -> 따로 객체 안만듦, add(new ~)로 바로 생성함
+		// pan_btn : 실행 및 정지 버튼 담을 판넬
+		// pan_filter : 검색을 위한 filter 판넬
+		// pan_packetInfo : Packet의 정보를 나열하는 헤더가 담긴 판넬 -> 따로 객체 안만듦, add(new ~)로 바로 생성함
 		pan_btn = new JPanel();
 		// pan_sec.setBackground(Color.blue);
 		btn_run = new JButton("RUN");
 		btn_stop = new JButton("STOP");
 		pan_btn.add(btn_run);
 		pan_btn.add(btn_stop);
+		btn_run.addActionListener(new ButtonActionListener());
+		btn_stop.addActionListener(new ButtonActionListener());
 
 		pan_filter = new JPanel();
 		// pan_thd.setBackground(Color.red);
 		text_filter = new JTextField(20);
 		la_filter = new JLabel("  filter : ");
+		btn_search = new JButton("SEARCH");
 		pan_filter.add(la_filter);
 		pan_filter.add(text_filter);
+		pan_filter.add(btn_search);
+		btn_search.addActionListener(new ButtonActionListener());
 
 		// 3. 캡처된 패킷의 자세한 정보 요약하는 판넬
 		pan_packetTable = new JPanel();
 		// pan_packetTable.setBackground(Color.yellow);
 		pan_packetTable.setLayout(new GridLayout(1, 1));
-		area_packinfo = new JTextArea(); 
+		area_packinfo = new JTextArea();
 		scrol_packinfo = new JScrollPane(area_packinfo);
 		pan_packetTable.add(scrol_packinfo);
-		
+
 		// 실험중인 테이블화
 		table = new JTable(data, title);
 
 		// 4.lower 테이블
-			// pan_PacketInfo : 해당 패킷에 대한 구체적인 정보 출력 
-			// pan_PacketHexCode : 해당 패킷에 대한 헥사 값 출력 
+		// pan_PacketInfo : 해당 패킷에 대한 구체적인 정보 출력
+		// pan_PacketHexCode : 해당 패킷에 대한 헥사 값 출력
 		pan_PacketInfo = new JPanel();
 		area_packinfo = new JTextArea();
 		scrol_packinfo = new JScrollPane(area_packinfo);
@@ -179,11 +199,68 @@ public class MainView extends JFrame implements ActionListener, Runnable {
 			area_packinfo.setCaretPosition(area_packinfo.getText().length());
 		}
 	}
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 
+	class ButtonActionListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+
+			Object obj = e.getSource();
+			if ((JButton) obj == btn_run) {
+				System.out.println("실행버튼이 눌렸습니다.");
+			} else if ((JButton) obj == btn_stop) {
+				System.out.println("정지버튼이 눌렸습니다.");
+			} else if ((JButton) obj == btn_search) {
+				System.out.println("검색버튼이 눌렸습니다.");
+			}
+		}
 	}
+
+	class MenuActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			String cmd = e.getActionCommand();
+			switch (cmd) {
+			case "open":
+				System.out.println("파일 불러오기 기능");
+				break;
+			case "close":
+				System.out.println("파일 검색 닫기");
+				break;
+			case "save":
+				System.out.println("해당 패킷정보들 저장하기");
+				break;
+			case "FindPacket":
+				System.out.println("특정 패킷 찾기");
+				break;
+			case "MarkUnMark":
+				System.out.println("");
+				break;
+			case "Ignore":
+				System.out.println();
+				break;
+			case "ShowPacketinNewWindow":
+				System.out.println("선택된 패킷의 자세한 정보와 헥사값을 한번에 볼 수 있음. or 더블클릭");
+				break;
+			case "Gotopacket":
+				System.out.println("마지막으로 눌려져 있던 패킷으로 이동");
+				break;
+			case "Previouspacket":
+				System.out.println("이전 패킷으로 이동");
+				break;
+			case "Nextpacket":
+				System.out.println("다음 패킷으로 이동");
+				break;
+			case "Firstpacket":
+				System.out.println("가장 맨 처음 패킷으로 이동");
+				break;
+			case "Lastpacket":
+				System.out.println("가장 최근 패킷으로 이동");
+				break;
+			
+			}
+		}
+	}
+
 	public static void main(String[] args) {
 		new MainView();
 	}
