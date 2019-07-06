@@ -22,15 +22,16 @@ public class Device {
 			return null;
 		} //예외처리
 		
-		System.out.println("< 탐색된 네트워크 Device >");
 		int i=0;
-		
 		for(PcapIf device : allDevs) { //탐색한 장비를 출력
 			String description = (device.getDescription() != null ) ? device.getDescription() : "장비에 대한 설명이 없습니다.";
-			System.out.printf("[%d번]: %s [%s]\n", ++i, device.getName(), description);
+			if(description.equals("MS NDIS 6.0 LoopBack Driver")) {
+				break;
+			}
+			else i++;
 		}
 		
-		PcapIf device = allDevs.get(1);
+		PcapIf device = allDevs.get(i);
 		System.out.printf("선택된 장치: %s\n", (device.getDescription() != null) ? device.getDescription() : device.getName());
 		
 		int snaplen = 64*1024; //65536Byte만큼 패킷 캡쳐
