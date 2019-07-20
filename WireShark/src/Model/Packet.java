@@ -15,7 +15,8 @@ import org.jnetpcap.protocol.network.Icmp;
 import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Tcp;
 import org.jnetpcap.protocol.tcpip.Udp;
-
+import org.jnetpcap.protocol.network.Arp;
+import org.jnetpcap.protocol.tcpip.Http;
 public class Packet {
 
 
@@ -23,6 +24,7 @@ public class Packet {
 		
 		//계층별 객체 생성
 		Icmp icmp = new Icmp();
+		Icmp.DestinationUnreachable unreach = new Icmp.DestinationUnreachable();
 		Ethernet eth = new Ethernet();
 		Ip4 ip = new Ip4();
 		Tcp tcp = new Tcp();
@@ -30,7 +32,8 @@ public class Packet {
 		Payload payload = new Payload();
 		PcapHeader header = new PcapHeader(JMemory.POINTER);
 		JBuffer buf = new JBuffer(JMemory.POINTER);
-		
+		Arp arp = new Arp();
+		Http http = new Http();
 		Pcap pcap=Device.getPcap();
 		int id = JRegistry.mapDLTToId(pcap.datalink()); //pcap의 datalink 유형을 jNetPcap의 프로토콜 id에 맵핑
 		
@@ -41,7 +44,9 @@ public class Packet {
 			
 			System.out.printf("[ #%d ]\n", packet.getFrameNumber());
 			System.out.println("#############packet#############");
-			if(packet.hasHeader(icmp)) {
+			if(packet.hasHeader(icmp) && icmp.hasSubHeader(unreach)) {
+     	    	   System.out.printf("type=%d, code=%d, crc=0x%x reserved=%d\n", 
+     	    	       icmp.type(), icmp.code(), icmp.checksum(), unreach.reserved()); 
 				System.out.println("icmp");
 				System.out.printf("출발지 MAC 주소 = %s\n도착지 MAC 주소 = %s\n" ,macSource(packet, eth), macDestination(packet, eth));
 			}
@@ -51,10 +56,22 @@ public class Packet {
 			if (packet.hasHeader(ip)) {
 				System.out.printf("출발지 IP 주소 = %s\n도착지 IP 주소 = %s\n" ,ipSource(packet, ip) , ipDestination(packet, ip));
 			}
+			if (packet.hasHeader(arp)) {
+				System.out.println("arp");
+				//System.out.println("ARP protocol type:\t" + arp.protocolType());
+			}
 			if (packet.hasHeader(Tcp.ID)) {
+				 if(packet.hasHeader(http)&&(tcp.destination() == 80)) {
+		               if(http.hasField(Http.Request.Accept) && http.fieldValue(Http.Request.Accept).contains("text/html")) {
+		            	   System.out.println("http"); 
+		            	   String host = http.fieldValue(Http.Request.Host);
+		            	   String url = host + http.fieldValue(Http.Request.RequestUrl);
+		               }
+
 				packet.getHeader(tcp);
 				System.out.printf("tcp.ack=%x%n", tcp.ack());
 				System.out.printf("출발지 TCP 포트 = %d\n도착지 TCP 포트 = %d\n" , tcpSource(packet, tcp), tcpDestination(packet, tcp));
+				 }
 			}
 			if (packet.hasHeader(udp)) {
 				if(udp.destination() == 5535) //LLMNR 
@@ -72,8 +89,9 @@ public class Packet {
 		}
 			
 		pcap.close();
+		}
 	
-	}
+	
 	/*	icmp 주소가 ip주소랑 같..? 못찾음
 	public static String icmpSource(PcapPacket packet, Icmp icmp) {
 		
@@ -126,8 +144,7 @@ public class Packet {
 	public static String hexdump(PcapPacket packet, Payload payload) {
 		return payload.toHexdump();
 	}
-	
-	}
+}
 	
 
 
